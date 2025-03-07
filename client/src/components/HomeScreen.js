@@ -1,12 +1,12 @@
-// client/src/components/HomeScreen.js
 import React, { useState } from 'react';
 import './HomeScreen.css';
 
-function HomeScreen() {
+function HomeScreen({ onCardAdded }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [results, setResults] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [error, setError] = useState(null);
+  const [message, setMessage] = useState('');
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -16,7 +16,6 @@ function HomeScreen() {
     try {
       const response = await fetch(`/api/cards/search?name=${encodeURIComponent(searchQuery)}`);
       const data = await response.json();
-      // Check for the nested products array
       if (data.products && data.products.products && data.products.products.length > 0) {
         setResults(data.products.products);
       } else {
@@ -33,12 +32,39 @@ function HomeScreen() {
     setResults([]);
   };
 
+  const handleAddToCollection = async () => {
+    if (!selectedProduct) return;
+    try {
+      const response = await fetch('/api/cards', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: selectedProduct["product-name"],
+          set: selectedProduct["console-name"],
+          condition: 'N/A', // You can modify this to include actual condition if available
+          price: selectedProduct["loose-price"] || 0,
+        }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        onCardAdded(data);
+        setMessage('Card added to collection');
+      } else {
+        setError(data.message);
+      }
+    } catch (err) {
+      setError('Error adding card to collection');
+    }
+  };
+
   return (
     <div className="home-container">
       <header className="home-header">
         <img
-          src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png"
-          alt="Pikachu"
+          src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/94.png"
+          alt="Gengar"
           className="pokeball-img"
         />
         <h1 className="home-title">PokéPrice Checker</h1>
@@ -89,6 +115,8 @@ function HomeScreen() {
                 ${(selectedProduct["loose-price"] / 100).toFixed(2)}
               </p>
             )}
+            <button onClick={handleAddToCollection} className="add-button">Add to Collection</button>
+            {message && <p className="message">{message}</p>}
           </div>
         )}
       </main>

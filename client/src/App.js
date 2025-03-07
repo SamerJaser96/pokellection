@@ -1,7 +1,7 @@
-// client/src/App.js
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import HomeScreen from './components/HomeScreen';
-import CardForm from './components/CardForm';
+import CollectionScreen from './components/CollectionScreen';
 import './App.css';
 
 function App() {
@@ -11,28 +11,35 @@ function App() {
     setCards((prevCards) => [...prevCards, newCard]);
   };
 
-  // Fetch existing cards on load
   useEffect(() => {
     fetch('/api/cards')
       .then((res) => res.json())
-      .then((data) => setCards(data))
+      .then((data) => {
+        console.log('Fetched cards:', data); // Add this line
+        setCards(data);
+      })
       .catch((err) => console.error(err));
   }, []);
 
   return (
-    <div>
-      <HomeScreen />
-      <h2>Add a Card to Your Collection</h2>
-      <CardForm onCardAdded={handleCardAdded} />
-      <h2>Your Collection</h2>
-      <ul>
-        {cards.map((card) => (
-          <li key={card._id}>
-            {card.name} - {card.set} - {card.condition} - ${card.price}
-          </li>
-        ))}
-      </ul>
-    </div>
+    <Router>
+      <div>
+        <nav>
+          <ul>
+            <li>
+              <Link to="/">Home</Link>
+            </li>
+            <li>
+              <Link to="/collection">Collection</Link>
+            </li>
+          </ul>
+        </nav>
+        <Routes>
+          <Route path="/" element={<HomeScreen onCardAdded={handleCardAdded} />} />
+          <Route path="/collection" element={<CollectionScreen cards={cards} />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
