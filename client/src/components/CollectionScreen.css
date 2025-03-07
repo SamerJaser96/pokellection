@@ -1,0 +1,27 @@
+/* client/src/components/CollectionScreen.css */
+.collection-container {
+    padding: 20px;
+    max-width: 600px;
+    margin: auto;
+    background: #f4f4f4;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+  
+  .collection-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .collection-item {
+    padding: 10px;
+    margin-bottom: 5px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+  
+  .error-text {
+    color: red;
+  }
+  

@@ -1,0 +1,158 @@
+/* client/src/components/HomeScreen.css */
+.home-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #FFEEAD, #FF5F6D);
+    font-family: 'Arial', sans-serif;
+    color: #2c3e50;
+    padding: 20px;
+  }
+  
+  .home-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .pokeball-img {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .home-title {
+    font-size: 3rem;
+    margin: 0.5rem 0;
+  }
+  
+  .home-subtitle {
+    font-size: 1.5rem;
+    margin: 0;
+  }
+  
+  .home-main {
+    width: 100%;
+    max-width: 500px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .search-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .search-input {
+    padding: 10px;
+    font-size: 1.2rem;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+  }
+  
+  .search-input:focus {
+    border-color: #ff5f6d;
+  }
+  
+  .search-button {
+    padding: 10px;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 8px;
+    background-color: #ff5f6d;
+    color: white;
+    cursor: pointer;
+  }
+  
+  .search-button:hover {
+    background-color: #ff7f87;
+  }
+  
+  .results-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 1rem;
+  }
+  
+  .result-item {
+    padding: 10px;
+    background: #f8f8f8;
+    margin-bottom: 5px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  .result-item:hover {
+    background: #ffe6e6;
+  }
+  
+  .product-details {
+    margin-top: 2rem;
+    background: #fff;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: center;
+  }
+  
+  .add-button {
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 8px;
+    background-color: #28a745;
+    color: white;
+    cursor: pointer;
+    margin-top: 1rem;
+  }
+  
+  .add-button:hover {
+    background-color: #218838;
+  }
+  
+  .message {
+    margin-top: 1rem;
+    text-align: center;
+    font-weight: bold;
+  }
+  
+  .error {
+    margin-top: 1rem;
+    text-align: center;
+  }
+  
+  .error-text {
+    color: red;
+    font-size: 1.2rem;
+  }
+  
+  .collection {
+    margin-top: 2rem;
+    background: #eef;
+    padding: 15px;
+    border-radius: 10px;
+  }
+  
+  .home-footer {
+    margin-top: auto;
+    text-align: center;
+    padding: 1rem 0;
+  }
+
+  /* filepath: /Users/samerjaser/repos/pokellection/client/src/components/HomeScreen.css */
+.collection-link {
+    display: block;
+    margin-top: 20px;
+    text-align: center;
+    font-size: 1.2rem;
+    color: #ff5f6d;
+    text-decoration: none;
+  }
+  
+  .collection-link:hover {
+    text-decoration: underline;
+  }
