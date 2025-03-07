@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { fetchCardProducts } = require('../utils/priceCharting');
 const Card = require('../models/Card');
+const { fetchCardProducts } = require('../utils/priceCharting');
 
 // GET route to search for products
 router.get('/search', async (req, res) => {
@@ -32,5 +32,14 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Export the router only once, after all routes have been defined
+// GET route to fetch all cards
+router.get('/', async (req, res) => {
+  try {
+    const cards = await Card.find();
+    res.json(cards);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;
