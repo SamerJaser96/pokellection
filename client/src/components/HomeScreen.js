@@ -15,10 +15,10 @@ function HomeScreen() {
     setSelectedProduct(null);
     try {
       const response = await fetch(`/api/cards/search?name=${encodeURIComponent(searchQuery)}`);
-
       const data = await response.json();
-      if (data.products && data.products.length > 0) {
-        setResults(data.products);
+      // Check for the nested products array
+      if (data.products && data.products.products && data.products.products.length > 0) {
+        setResults(data.products.products);
       } else {
         setError("No products found.");
       }
@@ -78,10 +78,16 @@ function HomeScreen() {
             <h2>{selectedProduct["product-name"]}</h2>
             <p><strong>Console:</strong> {selectedProduct["console-name"]}</p>
             {selectedProduct["cib-price"] && (
-              <p><strong>CIB Price:</strong> ${(selectedProduct["cib-price"] / 100).toFixed(2)}</p>
+              <p>
+                <strong>CIB Price:</strong>{" "}
+                ${(selectedProduct["cib-price"] / 100).toFixed(2)}
+              </p>
             )}
             {selectedProduct["loose-price"] && (
-              <p><strong>Loose Price:</strong> ${(selectedProduct["loose-price"] / 100).toFixed(2)}</p>
+              <p>
+                <strong>Loose Price:</strong>{" "}
+                ${(selectedProduct["loose-price"] / 100).toFixed(2)}
+              </p>
             )}
           </div>
         )}
