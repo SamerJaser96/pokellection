@@ -48,6 +48,9 @@ function HomeScreen({ onCardAdded }) {
           set: selectedProduct["console-name"],
           condition: 'N/A', // You can modify this to include actual condition if available
           price: selectedProduct["loose-price"] || 0,
+          loosePrice: selectedProduct["loose-price"] || 0,
+          psa9Price: selectedProduct["graded-price"] || 0,
+          psa10Price: selectedProduct["manual-only-price"] || 0,
         }),
       });
       const data = await response.json();

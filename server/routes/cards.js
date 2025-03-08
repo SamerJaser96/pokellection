@@ -22,8 +22,8 @@ router.get('/search', async (req, res) => {
 
 // POST route to add a new card
 router.post('/', async (req, res) => {
-  const { name, set, condition, price } = req.body;
-  const card = new Card({ name, set, condition, price });
+  const { name, set, condition, price, loosePrice, psa9Price, psa10Price } = req.body;
+  const card = new Card({ name, set, condition, price, loosePrice, psa9Price, psa10Price });
   try {
     const newCard = await card.save();
     res.status(201).json(newCard);
@@ -49,9 +49,10 @@ router.delete('/:id', async (req, res) => {
     if (!card) {
       return res.status(404).json({ message: 'Card not found' });
     }
-    await card.remove();
+    await Card.deleteOne({ _id: req.params.id });
     res.json({ message: 'Card deleted' });
   } catch (err) {
+    console.error("Error deleting card:", err);
     res.status(500).json({ message: err.message });
   }
 });
