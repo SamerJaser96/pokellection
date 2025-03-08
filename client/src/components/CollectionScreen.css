@@ -45,9 +45,11 @@ html, body {
     border-radius: 10px;
     padding: 10px;
     margin-bottom: 10px;
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr auto;
+    gap: 10px;
     align-items: center;
+    text-align: center;
   }
   
   .collection-item strong {
@@ -57,11 +59,23 @@ html, body {
   .card-prices {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+    text-align: center;
   }
   
   .card-prices p {
     margin: 0;
+  }
+  
+  .grade-select {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .grade-select label {
+    margin-bottom: 5px;
   }
   
   .delete-button {
