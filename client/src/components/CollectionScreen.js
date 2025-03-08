@@ -129,7 +129,6 @@ function CollectionScreen({ cards, onCardDeleted }) {
                 </div>
                 <button onClick={() => handleDelete(card._id)} className="delete-button">Delete</button>
                 <button onClick={() => {
-                  console.log('Selected card ID:', card.cardId); // Debugging log
                   navigate(`/price-chart/${card.cardId}`);
                 }} className="view-chart-button">View Price Changes</button>
               </li>
