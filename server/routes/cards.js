@@ -69,13 +69,13 @@ router.get('/:cardId/prices', async (req, res) => {
     // Extract relevant price fields
     const prices = [
       { date: '2023-11-03', price: data['loose-price'] },
-      { date: '2023-11-03', price: data['graded-price'] },
-      { date: '2023-11-03', price: data['manual-only-price'] },
-      { date: '2023-11-03', price: data['bgs-10-price'] },
-      { date: '2023-11-03', price: data['box-only-price'] },
-      { date: '2023-11-03', price: data['condition-17-price'] },
-      { date: '2023-11-03', price: data['condition-18-price'] },
-      { date: '2023-11-03', price: data['new-price'] }
+      { date: '2023-11-04', price: data['loose-price']  },
+      { date: '2023-11-05', price: data['loose-price']  },
+      { date: '2023-11-06', price: data['loose-price']  },
+      { date: '2023-11-07', price: data['loose-price']  },
+      { date: '2023-11-08', price: data['loose-price']  },
+      { date: '2023-11-09', price: data['loose-price']  },
+      { date: '2023-11-010', price: data['loose-price']  }
     ].filter(price => price.price !== undefined);
 
     if (prices.length > 0) {
