@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './HomeScreen.css';
 
 function HomeScreen({ onCardAdded }) {
@@ -65,12 +65,21 @@ function HomeScreen({ onCardAdded }) {
     }
   };
 
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => {
+        setMessage('');
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+
   return (
     <div className="home-container">
       <header className="home-header">
         <img
           src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/94.png"
-          alt="Gengar"
+          alt="Pikachu"
           className="pokeball-img"
         />
         <h1 className="home-title">PokéPrice Checker</h1>

@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './CollectionScreen.css';
 
 function CollectionScreen({ cards, onCardDeleted }) {
   const [selectedGrades, setSelectedGrades] = useState({});
   const [sortCriteria, setSortCriteria] = useState('loose');
+  const [message, setMessage] = useState('');
 
   const handleDelete = async (cardId) => {
     try {
@@ -12,6 +13,7 @@ function CollectionScreen({ cards, onCardDeleted }) {
       });
       if (response.ok) {
         onCardDeleted(cardId);
+        setMessage('Card deleted from collection');
       } else {
         console.error('Failed to delete card');
       }
@@ -30,6 +32,15 @@ function CollectionScreen({ cards, onCardDeleted }) {
   const handleSortChange = (e) => {
     setSortCriteria(e.target.value);
   };
+
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => {
+        setMessage('');
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
 
   const totalLoosePrice = cards.reduce((total, card) => total + (card.loosePrice || 0), 0);
   const totalPSA9Price = cards.reduce((total, card) => total + (card.psa9Price || 0), 0);
@@ -70,6 +81,7 @@ function CollectionScreen({ cards, onCardDeleted }) {
           <option value="psa10">PSA 10 Value</option>
         </select>
       </div>
+      {message && <p className="message">{message}</p>}
       {sortedCards.length > 0 ? (
         <>
           <ul className="collection-list">

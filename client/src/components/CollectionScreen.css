@@ -61,6 +61,13 @@ html, body {
     border-color: #ff6347;
   }
   
+  .message {
+    text-align: center;
+    font-size: 1.2em;
+    color: #ff4500;
+    margin-bottom: 20px;
+  }
+  
   .collection-list {
     list-style-type: none;
     padding: 0;
