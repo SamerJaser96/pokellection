@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import HomeScreen from './components/HomeScreen';
 import CollectionScreen from './components/CollectionScreen';
 import './App.css';
+import PriceChangeChart from './components/PriceChangeChart';
 
 function App() {
   const [cards, setCards] = useState([]);
@@ -42,6 +43,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomeScreen onCardAdded={handleCardAdded} />} />
           <Route path="/collection" element={<CollectionScreen cards={cards} onCardDeleted={handleCardDeleted} />} />
+          <Route path="/price-chart/:cardId" element={<PriceChangeChart />} />
         </Routes>
       </div>
     </Router>

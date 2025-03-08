@@ -9,6 +9,7 @@ const CardSchema = new Schema({
   loosePrice: { type: Number, default: 0 },
   psa9Price: { type: Number, default: 0 },
   psa10Price: { type: Number, default: 0 },
+  cardId: { type: String, required: true }, // Add cardId field
   dateAdded: { type: Date, default: Date.now }
 });
 

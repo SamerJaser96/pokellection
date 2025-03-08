@@ -61,13 +61,6 @@ html, body {
     border-color: #ff6347;
   }
   
-  .message {
-    text-align: center;
-    font-size: 1.2em;
-    color: #ff4500;
-    margin-bottom: 20px;
-  }
-  
   .collection-list {
     list-style-type: none;
     padding: 0;
@@ -112,7 +105,7 @@ html, body {
     margin-bottom: 5px;
   }
   
-  .delete-button {
+  .delete-button, .view-chart-button {
     background-color: #ff4500;
     color: white;
     border: none;
@@ -122,7 +115,7 @@ html, body {
     transition: background-color 0.3s;
   }
   
-  .delete-button:hover {
+  .delete-button:hover, .view-chart-button:hover {
     background-color: #ff6347;
   }
   

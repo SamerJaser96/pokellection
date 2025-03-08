@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './CollectionScreen.css';
 
 function CollectionScreen({ cards, onCardDeleted }) {
   const [selectedGrades, setSelectedGrades] = useState({});
   const [sortCriteria, setSortCriteria] = useState('loose');
   const [message, setMessage] = useState('');
+  const navigate = useNavigate();
 
   const handleDelete = async (cardId) => {
     try {
@@ -126,6 +128,10 @@ function CollectionScreen({ cards, onCardDeleted }) {
                   </label>
                 </div>
                 <button onClick={() => handleDelete(card._id)} className="delete-button">Delete</button>
+                <button onClick={() => {
+                  console.log('Selected card ID:', card.cardId); // Debugging log
+                  navigate(`/price-chart/${card.cardId}`);
+                }} className="view-chart-button">View Price Changes</button>
               </li>
             ))}
           </ul>

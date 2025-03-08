@@ -51,6 +51,7 @@ function HomeScreen({ onCardAdded }) {
           loosePrice: selectedProduct["loose-price"] || 0,
           psa9Price: selectedProduct["graded-price"] || 0,
           psa10Price: selectedProduct["manual-only-price"] || 0,
+          cardId: selectedProduct["id"], // Include cardId
         }),
       });
       const data = await response.json();
