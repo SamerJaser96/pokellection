@@ -11,14 +11,19 @@ function App() {
     setCards((prevCards) => [...prevCards, newCard]);
   };
 
+  const handleCardDeleted = (cardId) => {
+    setCards((prevCards) => prevCards.filter(card => card._id !== cardId));
+  };
+
+  // Fetch existing cards on load
   useEffect(() => {
     fetch('/api/cards')
       .then((res) => res.json())
       .then((data) => {
-        console.log('Fetched cards:', data); // Add this line
+        console.log('Fetched cards:', data);
         setCards(data);
       })
-      .catch((err) => console.error(err));
+      .catch((err) => console.error('Error fetching cards:', err));
   }, []);
 
   return (
@@ -36,7 +41,7 @@ function App() {
         </nav>
         <Routes>
           <Route path="/" element={<HomeScreen onCardAdded={handleCardAdded} />} />
-          <Route path="/collection" element={<CollectionScreen cards={cards} />} />
+          <Route path="/collection" element={<CollectionScreen cards={cards} onCardDeleted={handleCardDeleted} />} />
         </Routes>
       </div>
     </Router>

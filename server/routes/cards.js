@@ -42,4 +42,18 @@ router.get('/', async (req, res) => {
   }
 });
 
+// DELETE route to delete a card
+router.delete('/:id', async (req, res) => {
+  try {
+    const card = await Card.findById(req.params.id);
+    if (!card) {
+      return res.status(404).json({ message: 'Card not found' });
+    }
+    await card.remove();
+    res.json({ message: 'Card deleted' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

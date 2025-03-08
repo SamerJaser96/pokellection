@@ -16,7 +16,10 @@ function HomeScreen({ onCardAdded }) {
     try {
       const response = await fetch(`/api/cards/search?name=${encodeURIComponent(searchQuery)}`);
       const data = await response.json();
-      if (data.products && data.products.products && data.products.products.length > 0) {
+      console.log("Fetched products:", data); // Log the fetched products
+      if (data.products && data.products.length > 0) {
+        setResults(data.products);
+      } else if (data.products && data.products.products && data.products.products.length > 0) {
         setResults(data.products.products);
       } else {
         setError("No products found.");
@@ -113,6 +116,24 @@ function HomeScreen({ onCardAdded }) {
               <p>
                 <strong>Loose Price:</strong>{" "}
                 ${(selectedProduct["loose-price"] / 100).toFixed(2)}
+              </p>
+            )}
+            {selectedProduct["ungraded-price"] && (
+              <p>
+                <strong>Ungraded Price:</strong>{" "}
+                ${(selectedProduct["ungraded-price"] / 100).toFixed(2)}
+              </p>
+            )}
+            {selectedProduct["graded-price"] && (
+              <p>
+                <strong>PSA 9 Price:</strong>{" "}
+                ${(selectedProduct["graded-price"] / 100).toFixed(2)}
+              </p>
+            )}
+            {selectedProduct["manual-only-price"] && (
+              <p>
+                <strong>PSA 10 Price:</strong>{" "}
+                ${(selectedProduct["manual-only-price"] / 100).toFixed(2)}
               </p>
             )}
             <button onClick={handleAddToCollection} className="add-button">Add to Collection</button>
