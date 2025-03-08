@@ -3,6 +3,7 @@ import './CollectionScreen.css';
 
 function CollectionScreen({ cards, onCardDeleted }) {
   const [selectedGrades, setSelectedGrades] = useState({});
+  const [sortCriteria, setSortCriteria] = useState('loose');
 
   const handleDelete = async (cardId) => {
     try {
@@ -26,6 +27,10 @@ function CollectionScreen({ cards, onCardDeleted }) {
     }));
   };
 
+  const handleSortChange = (e) => {
+    setSortCriteria(e.target.value);
+  };
+
   const totalLoosePrice = cards.reduce((total, card) => total + (card.loosePrice || 0), 0);
   const totalPSA9Price = cards.reduce((total, card) => total + (card.psa9Price || 0), 0);
   const totalPSA10Price = cards.reduce((total, card) => total + (card.psa10Price || 0), 0);
@@ -42,13 +47,29 @@ function CollectionScreen({ cards, onCardDeleted }) {
     }
   }, 0);
 
-  // Sort cards by highest loose value
-  const sortedCards = [...cards].sort((a, b) => (b.loosePrice || 0) - (a.loosePrice || 0));
+  // Sort cards based on selected criteria
+  const sortedCards = [...cards].sort((a, b) => {
+    if (sortCriteria === 'psa9') {
+      return (b.psa9Price || 0) - (a.psa9Price || 0);
+    } else if (sortCriteria === 'psa10') {
+      return (b.psa10Price || 0) - (a.psa10Price || 0);
+    } else {
+      return (b.loosePrice || 0) - (a.loosePrice || 0);
+    }
+  });
 
   return (
     <div className="collection-container">
       <h1 className="collection-title">Your Collection</h1>
       <p className="collection-count">Total Cards: {cards.length}</p>
+      <div className="sort-container">
+        <label htmlFor="sort">Sort by: </label>
+        <select id="sort" value={sortCriteria} onChange={handleSortChange}>
+          <option value="loose">Loose Value</option>
+          <option value="psa9">PSA 9 Value</option>
+          <option value="psa10">PSA 10 Value</option>
+        </select>
+      </div>
       {sortedCards.length > 0 ? (
         <>
           <ul className="collection-list">
