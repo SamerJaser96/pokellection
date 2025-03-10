@@ -5,8 +5,22 @@ function HomeScreen({ onCardAdded }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [results, setResults] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [collections, setCollections] = useState([]);
+  const [selectedCollection, setSelectedCollection] = useState('');
   const [error, setError] = useState(null);
   const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    fetch('/api/cards/collections')
+      .then((res) => res.json())
+      .then((data) => {
+        setCollections(data);
+        if (data.length > 0) {
+          setSelectedCollection(data[0]._id); // Set default selected collection
+        }
+      })
+      .catch((err) => console.error('Error fetching collections:', err));
+  }, []);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -36,7 +50,7 @@ function HomeScreen({ onCardAdded }) {
   };
 
   const handleAddToCollection = async () => {
-    if (!selectedProduct) return;
+    if (!selectedProduct || !selectedCollection) return;
     try {
       const response = await fetch('/api/cards', {
         method: 'POST',
@@ -52,6 +66,7 @@ function HomeScreen({ onCardAdded }) {
           psa9Price: selectedProduct["graded-price"] || 0,
           psa10Price: selectedProduct["manual-only-price"] || 0,
           cardId: selectedProduct["id"], // Include cardId
+          collectionId: selectedCollection, // Include collectionId
         }),
       });
       const data = await response.json();
@@ -149,6 +164,20 @@ function HomeScreen({ onCardAdded }) {
                 ${(selectedProduct["manual-only-price"] / 100).toFixed(2)}
               </p>
             )}
+            <div className="collection-select">
+              <label htmlFor="collection">Select Collection:</label>
+              <select
+                id="collection"
+                value={selectedCollection}
+                onChange={(e) => setSelectedCollection(e.target.value)}
+              >
+                {collections.map((collection) => (
+                  <option key={collection._id} value={collection._id}>
+                    {collection.name}
+                  </option>
+                ))}
+              </select>
+            </div>
             <button onClick={handleAddToCollection} className="add-button">Add to Collection</button>
             {message && <p className="message">{message}</p>}
           </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import HomeScreen from './components/HomeScreen';
 import CollectionScreen from './components/CollectionScreen';
+import CollectionsScreen from './components/CollectionsScreen';
 import './App.css';
 import PriceChangeChart from './components/PriceChangeChart';
 
@@ -36,13 +37,14 @@ function App() {
               <Link to="/">Home</Link>
             </li>
             <li>
-              <Link to="/collection">Collection</Link>
+              <Link to="/collections">Collections</Link>
             </li>
           </ul>
         </nav>
         <Routes>
           <Route path="/" element={<HomeScreen onCardAdded={handleCardAdded} />} />
-          <Route path="/collection" element={<CollectionScreen cards={cards} onCardDeleted={handleCardDeleted} />} />
+          <Route path="/collections" element={<CollectionsScreen />} />
+          <Route path="/collection/:id" element={<CollectionScreen cards={cards} onCardDeleted={handleCardDeleted} />} />
           <Route path="/price-chart/:cardId" element={<PriceChangeChart />} />
         </Routes>
       </div>

@@ -10,6 +10,7 @@ const CardSchema = new Schema({
   psa9Price: { type: Number, default: 0 },
   psa10Price: { type: Number, default: 0 },
   cardId: { type: String, required: true }, // Add cardId field
+  collection: { type: Schema.Types.ObjectId, ref: 'Collection' }, // Reference to Collection
   dateAdded: { type: Date, default: Date.now }
 });
 

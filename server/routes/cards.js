@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args)); // Correctly import node-fetch
 const Card = require('../models/Card');
+const Collection = require('../models/Collection');
 const { fetchCardProducts } = require('../utils/priceCharting');
 const PRICECHARTING_API_KEY = process.env.PRICECHARTING_API_KEY; // Ensure this is set in your environment variables
 
@@ -22,12 +23,14 @@ router.get('/search', async (req, res) => {
   }
 });
 
-// POST route to add a new card
+// POST route to add a new card to a collection
 router.post('/', async (req, res) => {
-  const { name, set, condition, price, loosePrice, psa9Price, psa10Price, cardId } = req.body;
-  const card = new Card({ name, set, condition, price, loosePrice, psa9Price, psa10Price, cardId });
+  const { name, set, condition, price, loosePrice, psa9Price, psa10Price, cardId, collectionId } = req.body;
+  const card = new Card({ name, set, condition, price, loosePrice, psa9Price, psa10Price, cardId, collection: collectionId });
   try {
     const newCard = await card.save();
+    // Add the card to the collection
+    await Collection.findByIdAndUpdate(collectionId, { $push: { cards: newCard._id } });
     res.status(201).json(newCard);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -97,4 +100,78 @@ router.get('/:cardId/prices', async (req, res) => {
   }
 });
 
+// POST route to add a new collection
+router.post('/collections', async (req, res) => {
+  const { name } = req.body;
+  const collection = new Collection({ name, cards: [] }); // Ensure cards array is empty
+  try {
+    const newCollection = await collection.save();
+    res.status(201).json(newCollection);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// GET route to fetch all collections
+router.get('/collections', async (req, res) => {
+  try {
+    const collections = await Collection.find().populate('cards');
+    console.log('Fetched collections:', collections); // Log the fetched collections
+    res.json(collections);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET route to fetch a single collection by ID
+router.get('/collections/:id', async (req, res) => {
+  try {
+    const collection = await Collection.findById(req.params.id).populate('cards');
+    if (!collection) {
+      return res.status(404).json({ message: 'Collection not found' });
+    }
+    res.json(collection);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.post('/', async (req, res) => {
+  const { name, set, condition, price, loosePrice, psa9Price, psa10Price, cardId, collectionId } = req.body;
+  const card = new Card({ name, set, condition, price, loosePrice, psa9Price, psa10Price, cardId, collection: collectionId });
+  try {
+    const newCard = await card.save();
+    // Add the card to the collection
+    await Collection.findByIdAndUpdate(collectionId, { $push: { cards: newCard._id } });
+    res.status(201).json(newCard);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+router.get('/collections/:id', async (req, res) => {
+  try {
+    const collection = await Collection.findById(req.params.id).populate('cards');
+    if (!collection) {
+      return res.status(404).json({ message: 'Collection not found' });
+    }
+    res.json(collection);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.delete('/collections/:id', async (req, res) => {
+  try {
+    const collection = await Collection.findById(req.params.id);
+    if (!collection) {
+      return res.status(404).json({ message: 'Collection not found' });
+    }
+    await Collection.deleteOne({ _id: req.params.id });
+    res.json({ message: 'Collection deleted' });
+  } catch (err) {
+    console.error("Error deleting collection:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
 module.exports = router;

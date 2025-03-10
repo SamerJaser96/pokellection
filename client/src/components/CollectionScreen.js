@@ -1,12 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import './CollectionScreen.css';
 
-function CollectionScreen({ cards, onCardDeleted }) {
+function CollectionScreen() {
+  const { id } = useParams(); // Get collection ID from URL parameter
+  const [collection, setCollection] = useState(null);
   const [selectedGrades, setSelectedGrades] = useState({});
   const [sortCriteria, setSortCriteria] = useState('loose');
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetch(`/api/cards/collections/${id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setCollection(data);
+      })
+      .catch((err) => console.error('Error fetching collection:', err));
+  }, [id]);
 
   const handleDelete = async (cardId) => {
     try {
@@ -14,7 +25,10 @@ function CollectionScreen({ cards, onCardDeleted }) {
         method: 'DELETE',
       });
       if (response.ok) {
-        onCardDeleted(cardId);
+        setCollection((prevCollection) => ({
+          ...prevCollection,
+          cards: prevCollection.cards.filter(card => card._id !== cardId),
+        }));
         setMessage('Card deleted from collection');
       } else {
         console.error('Failed to delete card');
@@ -43,6 +57,12 @@ function CollectionScreen({ cards, onCardDeleted }) {
       return () => clearTimeout(timer);
     }
   }, [message]);
+
+  if (!collection) {
+    return <div>Loading...</div>;
+  }
+
+  const { cards } = collection;
 
   const totalLoosePrice = cards.reduce((total, card) => total + (card.loosePrice || 0), 0);
   const totalPSA9Price = cards.reduce((total, card) => total + (card.psa9Price || 0), 0);
@@ -73,7 +93,7 @@ function CollectionScreen({ cards, onCardDeleted }) {
 
   return (
     <div className="collection-container">
-      <h1 className="collection-title">Your Collection</h1>
+      <h1 className="collection-title">{collection.name}</h1>
       <p className="collection-count">Total Cards: {cards.length}</p>
       <div className="sort-container">
         <label htmlFor="sort">Sort by: </label>
