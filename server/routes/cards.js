@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args)); // Correctly import node-fetch
 const Card = require('../models/Card');
 const { fetchCardProducts } = require('../utils/priceCharting');
 const PRICECHARTING_API_KEY = process.env.PRICECHARTING_API_KEY; // Ensure this is set in your environment variables
@@ -58,28 +59,35 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// Function to generate a list of dates between a start date and an end date
+const generateDateRange = (startDate, endDate) => {
+  const dates = [];
+  let currentDate = new Date(startDate);
+  while (currentDate <= new Date(endDate)) {
+    dates.push(new Date(currentDate).toISOString().split('T')[0]);
+    currentDate.setDate(currentDate.getDate() + 1); // Increment by one day
+  }
+  return dates;
+};
+
 // GET route to fetch historical prices for a card
 router.get('/:cardId/prices', async (req, res) => {
   const { cardId } = req.params;
   try {
-    const response = await fetch(`https://www.pricecharting.com/api/product?t=${PRICECHARTING_API_KEY}&id=${cardId}`, { timeout: 20000 }); // 20 seconds timeout
-    const data = await response.json();
-    console.log('Fetched data:', data); // Log the fetched data
+    const startDate = '2024-01-01'; // Define the start date
+    const endDate = '2025-03-01'; // Define the end date
+    const dateRange = generateDateRange(startDate, endDate);
 
-    // Extract relevant price fields
-    const prices = [
-      { date: '2023-11-03', price: data['loose-price'] },
-      { date: '2023-11-04', price: data['loose-price']  },
-      { date: '2023-11-05', price: data['loose-price']  },
-      { date: '2023-11-06', price: data['loose-price']  },
-      { date: '2023-11-07', price: data['loose-price']  },
-      { date: '2023-11-08', price: data['loose-price']  },
-      { date: '2023-11-09', price: data['loose-price']  },
-      { date: '2023-11-010', price: data['loose-price']  }
-    ].filter(price => price.price !== undefined);
+    const prices = await Promise.all(dateRange.map(async (date) => {
+      const response = await fetch(`https://www.pricecharting.com/api/product?t=${PRICECHARTING_API_KEY}&id=${cardId}`, { timeout: 20000 }); // 20 seconds timeout
+      const data = await response.json();
+      return { date, price: data['loose-price'] };
+    }));
 
-    if (prices.length > 0) {
-      res.json(prices);
+    const filteredPrices = prices.filter(price => price.price !== undefined);
+
+    if (filteredPrices.length > 0) {
+      res.json(filteredPrices);
     } else {
       res.status(404).json({ error: 'No price data found for this card' });
     }
