@@ -14,6 +14,7 @@ function CollectionScreen() {
     fetch(`/api/cards/collections/${id}`)
       .then((res) => res.json())
       .then((data) => {
+        console.log("Fetched collection:", data); // Log the fetched collection
         setCollection(data);
       })
       .catch((err) => console.error('Error fetching collection:', err));
@@ -63,6 +64,11 @@ function CollectionScreen() {
   }
 
   const { cards } = collection;
+  console.log("Cards array:", cards); // Log the cards array
+
+  if (!cards || cards.length === 0) {
+    return <div>Error: No cards found in the collection.</div>;
+  }
 
   const totalLoosePrice = cards.reduce((total, card) => total + (card.loosePrice || 0), 0);
   const totalPSA9Price = cards.reduce((total, card) => total + (card.psa9Price || 0), 0);
@@ -114,6 +120,12 @@ function CollectionScreen() {
                   <p><strong>Loose:</strong> ${(card.loosePrice / 100).toFixed(2)}</p>
                   <p><strong>PSA 9:</strong> ${(card.psa9Price / 100).toFixed(2)}</p>
                   <p><strong>PSA 10:</strong> ${(card.psa10Price / 100).toFixed(2)}</p>
+                  <h4>TCGPlayer Prices:</h4>
+                  <p><strong>Low Price:</strong> ${(card.tcgplayerPrices?.low || 0).toFixed(2)}</p>
+                  <p><strong>Mid Price:</strong> ${(card.tcgplayerPrices?.mid || 0).toFixed(2)}</p>
+                  <p><strong>High Price:</strong> ${(card.tcgplayerPrices?.high || 0).toFixed(2)}</p>
+                  <p><strong>Market Price:</strong> ${(card.tcgplayerPrices?.market || 0).toFixed(2)}</p>
+                  <p><strong>Direct Low Price:</strong> ${(card.tcgplayerPrices?.directLow || 0).toFixed(2)}</p>
                 </div>
                 <div className="grade-select">
                   <label>

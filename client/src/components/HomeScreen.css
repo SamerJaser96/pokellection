@@ -76,10 +76,18 @@
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s;
+    display: flex;
+    align-items: center;
   }
   
   .result-item:hover {
     background-color: #f0f0f0;
+  }
+  
+  .card-image {
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
   }
   
   .product-details {
@@ -173,4 +181,15 @@
     border: 2px solid #2c3e50;
     border-radius: 5px;
     outline: none;
+  }
+  
+  .api-source-select {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  
+  .api-source-select label {
+    margin-right: 10px;
+    font-size: 1em;
   }

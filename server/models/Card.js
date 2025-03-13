@@ -1,17 +1,21 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
 
-const CardSchema = new Schema({
+const cardSchema = new mongoose.Schema({
   name: { type: String, required: true },
   set: { type: String, required: true },
   condition: { type: String, required: true },
-  price: { type: Number, default: 0 },
-  loosePrice: { type: Number, default: 0 },
-  psa9Price: { type: Number, default: 0 },
-  psa10Price: { type: Number, default: 0 },
-  cardId: { type: String, required: true }, // Add cardId field
-  collection: { type: Schema.Types.ObjectId, ref: 'Collection' }, // Reference to Collection
-  dateAdded: { type: Date, default: Date.now }
+  loosePrice: { type: Number, required: true },
+  psa9Price: { type: Number, required: true },
+  psa10Price: { type: Number, required: true },
+  tcgplayerPrices: {
+    low: { type: Number, default: 0 },
+    mid: { type: Number, default: 0 },
+    high: { type: Number, default: 0 },
+    market: { type: Number, default: 0 },
+    directLow: { type: Number, default: 0 },
+  },
+  cardId: { type: String, required: true },
+  collection: { type: mongoose.Schema.Types.ObjectId, ref: 'Collection', required: true },
 });
 
-module.exports = mongoose.model('Card', CardSchema);
+module.exports = mongoose.model('Card', cardSchema);

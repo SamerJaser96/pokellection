@@ -9,6 +9,8 @@ function HomeScreen({ onCardAdded }) {
   const [selectedCollection, setSelectedCollection] = useState('');
   const [error, setError] = useState(null);
   const [message, setMessage] = useState('');
+  const [apiSource, setApiSource] = useState('pricecharting'); // New state for API source
+  const [showReverseHolo, setShowReverseHolo] = useState(false); // New state for toggle
 
   useEffect(() => {
     fetch('/api/cards/collections')
@@ -28,10 +30,13 @@ function HomeScreen({ onCardAdded }) {
     setResults([]);
     setSelectedProduct(null);
     try {
-      const response = await fetch(`/api/cards/search?name=${encodeURIComponent(searchQuery)}`);
+      const apiUrl = apiSource === 'pricecharting' ? '/api/cards/search' : '/api/cards/pokemontcg/search';
+      const response = await fetch(`${apiUrl}?name=${encodeURIComponent(searchQuery)}`);
       const data = await response.json();
       console.log("Fetched products:", data); // Log the fetched products
-      if (data.products && data.products.length > 0) {
+      if (data.data && data.data.length > 0) {
+        setResults(data.data);
+      } else if (data.products && data.products.length > 0) {
         setResults(data.products);
       } else if (data.products && data.products.products && data.products.products.length > 0) {
         setResults(data.products.products);
@@ -52,20 +57,30 @@ function HomeScreen({ onCardAdded }) {
   const handleAddToCollection = async () => {
     if (!selectedProduct || !selectedCollection) return;
     try {
+      console.log("Selected Product:", selectedProduct); // Log the selected product
+      console.log("TCGPlayer Data:", selectedProduct.tcgplayer); // Log the TCGPlayer data
+      const tcgplayerPrices = selectedProduct.tcgplayer?.prices?.holofoil || {};
+      console.log("TCGPlayer Prices:", tcgplayerPrices); // Log TCGPlayer prices
       const response = await fetch('/api/cards', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: selectedProduct["product-name"],
-          set: selectedProduct["console-name"],
+          name: selectedProduct.name || selectedProduct["product-name"],
+          set: selectedProduct.set?.name || selectedProduct["console-name"],
           condition: 'N/A', // You can modify this to include actual condition if available
-          price: selectedProduct["loose-price"] || 0,
           loosePrice: selectedProduct["loose-price"] || 0,
           psa9Price: selectedProduct["graded-price"] || 0,
           psa10Price: selectedProduct["manual-only-price"] || 0,
-          cardId: selectedProduct["id"], // Include cardId
+          tcgplayerPrices: {
+            low: tcgplayerPrices.low || 0,
+            mid: tcgplayerPrices.mid || 0,
+            high: tcgplayerPrices.high || 0,
+            market: tcgplayerPrices.market || 0,
+            directLow: tcgplayerPrices.directLow || 0,
+          },
+          cardId: selectedProduct.id || selectedProduct["id"], // Include cardId
           collectionId: selectedCollection, // Include collectionId
         }),
       });
@@ -90,6 +105,8 @@ function HomeScreen({ onCardAdded }) {
     }
   }, [message]);
 
+  const hasReverseHoloPrices = selectedProduct?.cardmarket?.prices?.reverseHoloTrend !== 0 || selectedProduct?.cardmarket?.prices?.reverseHoloAvg30 !== 0;
+
   return (
     <div className="home-container">
       <header className="home-header">
@@ -112,6 +129,28 @@ function HomeScreen({ onCardAdded }) {
           />
           <button type="submit" className="search-button">Search</button>
         </form>
+        <div className="api-source-select">
+          <label>
+            <input
+              type="radio"
+              name="apiSource"
+              value="pricecharting"
+              checked={apiSource === 'pricecharting'}
+              onChange={() => setApiSource('pricecharting')}
+            />
+            PriceCharting
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="apiSource"
+              value="pokemontcg"
+              checked={apiSource === 'pokemontcg'}
+              onChange={() => setApiSource('pokemontcg')}
+            />
+            Pokémon TCG
+          </label>
+        </div>
         {error && (
           <div className="error">
             <p className="error-text">Error: {error}</p>
@@ -125,44 +164,77 @@ function HomeScreen({ onCardAdded }) {
                 className="result-item"
                 onClick={() => handleSelectProduct(product)}
               >
-                {product["product-name"]} - {product["console-name"]}
+                <img src={product.images?.small || product.imageUrl} alt={product.name || product["product-name"]} className="card-image" />
+                {product.name || product["product-name"]} - {product.set?.name || product["console-name"]}
               </li>
             ))}
           </ul>
         )}
         {selectedProduct && (
           <div className="product-details">
-            <h2>{selectedProduct["product-name"]}</h2>
-            <p><strong>Console:</strong> {selectedProduct["console-name"]}</p>
-            {selectedProduct["cib-price"] && (
-              <p>
-                <strong>CIB Price:</strong>{" "}
-                ${(selectedProduct["cib-price"] / 100).toFixed(2)}
-              </p>
+            <h2>{selectedProduct.name || selectedProduct["product-name"]}</h2>
+            <img src={selectedProduct.images?.large || selectedProduct.imageUrl} alt={selectedProduct.name || selectedProduct["product-name"]} className="card-image" />
+            <p><strong>Set:</strong> {selectedProduct.set?.name || selectedProduct["console-name"]}</p>
+            {hasReverseHoloPrices && (
+              <div className="price-toggle">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={showReverseHolo}
+                    onChange={() => setShowReverseHolo(!showReverseHolo)}
+                  />
+                  Show Reverse Holo Prices
+                </label>
+              </div>
             )}
-            {selectedProduct["loose-price"] && (
-              <p>
-                <strong>Loose Price:</strong>{" "}
-                ${(selectedProduct["loose-price"] / 100).toFixed(2)}
-              </p>
-            )}
-            {selectedProduct["ungraded-price"] && (
-              <p>
-                <strong>Ungraded Price:</strong>{" "}
-                ${(selectedProduct["ungraded-price"] / 100).toFixed(2)}
-              </p>
-            )}
-            {selectedProduct["graded-price"] && (
-              <p>
-                <strong>PSA 9 Price:</strong>{" "}
-                ${(selectedProduct["graded-price"] / 100).toFixed(2)}
-              </p>
-            )}
-            {selectedProduct["manual-only-price"] && (
-              <p>
-                <strong>PSA 10 Price:</strong>{" "}
-                ${(selectedProduct["manual-only-price"] / 100).toFixed(2)}
-              </p>
+            {showReverseHolo && hasReverseHoloPrices ? (
+              <>
+                {selectedProduct.cardmarket?.prices?.reverseHoloTrend && selectedProduct.cardmarket.prices.reverseHoloTrend !== 0 && (
+                  <p>
+                    <strong>Reverse Holo Trend Price:</strong>{" "}
+                    ${(selectedProduct.cardmarket.prices.reverseHoloTrend).toFixed(2)}
+                  </p>
+                )}
+                {selectedProduct.cardmarket?.prices?.reverseHoloAvg30 && selectedProduct.cardmarket.prices.reverseHoloAvg30 !== 0 && (
+                  <p>
+                    <strong>Reverse Holo Average Price:</strong>{" "}
+                    ${(selectedProduct.cardmarket.prices.reverseHoloAvg30).toFixed(2)}
+                  </p>
+                )}
+              </>
+            ) : (
+              <>
+                {selectedProduct.cardmarket?.prices?.averageSellPrice && (
+                  <p>
+                    <strong>Average Sell Price:</strong>{" "}
+                    ${(selectedProduct.cardmarket.prices.averageSellPrice).toFixed(2)}
+                  </p>
+                )}
+                {selectedProduct["loose-price"] && (
+                  <p>
+                    <strong>Loose Price:</strong>{" "}
+                    ${(selectedProduct["loose-price"] / 100).toFixed(2)}
+                  </p>
+                )}
+                {selectedProduct.cardmarket?.prices?.trendPrice && (
+                  <p>
+                    <strong>Trend Price:</strong>{" "}
+                    ${(selectedProduct.cardmarket.prices.trendPrice).toFixed(2)}
+                  </p>
+                )}
+                {selectedProduct["graded-price"] && (
+                  <p>
+                    <strong>PSA 9 Price:</strong>{" "}
+                    ${(selectedProduct["graded-price"] / 100).toFixed(2)}
+                  </p>
+                )}
+                {selectedProduct["manual-only-price"] && (
+                  <p>
+                    <strong>PSA 10 Price:</strong>{" "}
+                    ${(selectedProduct["manual-only-price"] / 100).toFixed(2)}
+                  </p>
+                )}
+              </>
             )}
             <div className="collection-select">
               <label htmlFor="collection">Select Collection:</label>

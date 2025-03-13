@@ -4,6 +4,8 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 const Card = require('../models/Card');
 const Collection = require('../models/Collection');
 const { fetchCardProducts } = require('../utils/priceCharting');
+const { fetchCardProducts: fetchPokemonTcgProducts } = require('../utils/pokemonTcgApi'); // Correct import statement
+
 const PRICECHARTING_API_KEY = process.env.PRICECHARTING_API_KEY; // Ensure this is set in your environment variables
 
 // GET route to search for products
@@ -25,13 +27,23 @@ router.get('/search', async (req, res) => {
 
 // POST route to add a new card to a collection
 router.post('/', async (req, res) => {
-  const { name, set, condition, price, loosePrice, psa9Price, psa10Price, cardId, collectionId } = req.body;
-  const card = new Card({ name, set, condition, price, loosePrice, psa9Price, psa10Price, cardId, collection: collectionId });
   try {
-    const newCard = await card.save();
+    const { name, set, condition, loosePrice, psa9Price, psa10Price, tcgplayerPrices, cardId, collectionId } = req.body;
+    const newCard = new Card({
+      name,
+      set,
+      condition,
+      loosePrice,
+      psa9Price,
+      psa10Price,
+      tcgplayerPrices,
+      cardId,
+      collection: collectionId,
+    });
+    const savedCard = await newCard.save();
     // Add the card to the collection
-    await Collection.findByIdAndUpdate(collectionId, { $push: { cards: newCard._id } });
-    res.status(201).json(newCard);
+    await Collection.findByIdAndUpdate(collectionId, { $push: { cards: savedCard._id } });
+    res.status(201).json(savedCard);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -136,31 +148,7 @@ router.get('/collections/:id', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
-  const { name, set, condition, price, loosePrice, psa9Price, psa10Price, cardId, collectionId } = req.body;
-  const card = new Card({ name, set, condition, price, loosePrice, psa9Price, psa10Price, cardId, collection: collectionId });
-  try {
-    const newCard = await card.save();
-    // Add the card to the collection
-    await Collection.findByIdAndUpdate(collectionId, { $push: { cards: newCard._id } });
-    res.status(201).json(newCard);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
-router.get('/collections/:id', async (req, res) => {
-  try {
-    const collection = await Collection.findById(req.params.id).populate('cards');
-    if (!collection) {
-      return res.status(404).json({ message: 'Collection not found' });
-    }
-    res.json(collection);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
+// DELETE route to delete a collection
 router.delete('/collections/:id', async (req, res) => {
   try {
     const collection = await Collection.findById(req.params.id);
@@ -174,4 +162,17 @@ router.delete('/collections/:id', async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
+// New Pokémon TCG API routes
+router.get('/pokemontcg/search', async (req, res) => {
+  const { name } = req.query;
+  try {
+    const products = await fetchPokemonTcgProducts(name);
+    res.json(products);
+  } catch (err) {
+    console.error('Error fetching Pokémon TCG data:', err);
+    res.status(500).json({ error: 'Failed to fetch Pokémon TCG data' });
+  }
+});
+
 module.exports = router;
