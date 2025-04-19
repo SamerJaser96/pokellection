@@ -8,22 +8,19 @@ function CardSearch() {
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    setPrice(null);
     setError(null);
-  
+    setResults([]);
+    setSelectedProduct(null);
     try {
       const response = await fetch(`/api/cards/search?name=${encodeURIComponent(searchQuery)}`);
-      // Log the raw response text to see what we're getting back
-      const text = await response.text();
-      console.log("Raw response text:", text);
+      const data = await response.json();
+      console.log("Fetched combined data:", data); // Log the entire response
   
-      if (!text) {
-        throw new Error("Empty response from server");
-      }
-      const data = JSON.parse(text);
-      setPrice(data.price);
+      // Handle potential issues with the structure of the response
+      const combinedResults = Array.isArray(data.products) ? data.products : [];
+      setResults(combinedResults);
     } catch (err) {
-      console.error("Error fetching price:", err);
+      console.error("Error fetching products:", err);
       setError(err.message);
     }
   };

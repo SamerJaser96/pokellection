@@ -1,7 +1,7 @@
 const axios = require('axios');
 require('dotenv').config();
 const API_KEY = process.env.POKEMON_TCG_API_KEY;
-
+const API_URL = "https://api.pokemontcg.io/v2/cards";
 async function fetchCardProducts(cardName) {
   const endpoint = 'https://api.pokemontcg.io/v2/cards';
   const url = `${endpoint}?q=name:${encodeURIComponent(cardName)}`;
@@ -21,5 +21,12 @@ async function fetchCardProducts(cardName) {
     throw error;
   }
 }
-
-module.exports = { fetchCardProducts };
+async function fetchPokemonTcgProducts(query) {
+  // Construct the full URL with query string using the "q" parameter as per the docs.
+  const url = `${API_URL}?q=${encodeURIComponent(query)}`;
+  console.log(`Fetching from Pokémon TCG API with URL: ${url}`);
+  const response = await fetch(url);
+  const data = await response.json();
+  return data;
+}
+module.exports = { fetchCardProducts: fetchPokemonTcgProducts };

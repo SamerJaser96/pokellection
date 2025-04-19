@@ -11,20 +11,49 @@ const PRICECHARTING_API_KEY = process.env.PRICECHARTING_API_KEY; // Ensure this 
 // GET route to search for products
 router.get('/search', async (req, res) => {
   const { name } = req.query;
-  console.log(`Search request received for card name: ${name}`); // Log the search request
+  console.log(`Fetching products for card name: ${name}`);
   if (!name) {
     return res.status(400).json({ message: 'Card name is required for search.' });
   }
   try {
-    const products = await fetchCardProducts(name);
-    console.log("Products fetched:", products); // Log the products
-    res.json({ products });
+    // Fetch PriceCharting products using the provided name.
+    const priceChartingProducts = await fetchCardProducts(name);
+
+    // For each PriceCharting product, build a TCG API query using its name and number.
+    const combinedResults = await Promise.all(
+      priceChartingProducts.products.map(async product => {
+        // Extract the card name and number (e.g., "Mantyke #55")
+        const [productName, productNumber] = product["product-name"].split('#').map(s => s.trim());
+        console.log(`PRODUCT NAME: ${productName}, PRODUCT NUMBER: ${productNumber}`);
+        
+        // Build a query string for the TCG API
+        const tcgQuery = `name:"${productName}" number:"${productNumber}"`;
+        console.log(`TCG Query: ${tcgQuery}`);
+        
+        // Fetch TCG product(s) using the constructed query string
+        const tcgResponse = await fetchPokemonTcgProducts(tcgQuery);
+        // Assume the API returns an object with a data property (an array).
+        const tcgProduct = tcgResponse.data && tcgResponse.data.length > 0 ? tcgResponse.data[0] : null;
+        console.log(`TCG PRODUCT: ${JSON.stringify(tcgProduct)}`);
+        
+        // Select the 'normal' price set if available, otherwise use the 'reverseHolofoil'
+        const priceSet = tcgProduct ? (tcgProduct.tcgplayer?.prices.normal || tcgProduct.tcgplayer?.prices.reverseHolofoil || {}) : {};
+        
+        return {
+          ...product,
+          tcgplayerPrices: priceSet,
+          tcgplayerUrl: tcgProduct ? tcgProduct.tcgplayer?.url || null : null,
+        };
+      })
+    );
+    
+    console.log("Combined Products fetched:", combinedResults);
+    res.json({ products: combinedResults });
   } catch (err) {
     console.error("Error in /search endpoint:", err);
     res.status(500).json({ message: 'Error fetching card products.' });
   }
 });
-
 // POST route to add a new card to a collection
 router.post('/', async (req, res) => {
   try {

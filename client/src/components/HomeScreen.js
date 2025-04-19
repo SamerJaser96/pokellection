@@ -30,19 +30,15 @@ function HomeScreen({ onCardAdded }) {
     setResults([]);
     setSelectedProduct(null);
     try {
-      const apiUrl = apiSource === 'pricecharting' ? '/api/cards/search' : '/api/cards/pokemontcg/search';
-      const response = await fetch(`${apiUrl}?name=${encodeURIComponent(searchQuery)}`);
+      const response = await fetch(`/api/cards/search?name=${encodeURIComponent(searchQuery)}`);
       const data = await response.json();
-      console.log("Fetched products:", data); // Log the fetched products
-      if (data.data && data.data.length > 0) {
-        setResults(data.data);
-      } else if (data.products && data.products.length > 0) {
-        setResults(data.products);
-      } else if (data.products && data.products.products && data.products.products.length > 0) {
-        setResults(data.products.products);
-      } else {
-        setError("No products found.");
-      }
+      console.log("Fetched combined data:", data); // Log the entire response
+  
+      // Handle potential issues with the structure of the response
+      const combinedResults = Array.isArray(data.products) ? data.products : [];
+      console.log("Combined Results:", combinedResults); // Log the combined results
+  
+      setResults(combinedResults);
     } catch (err) {
       console.error("Error fetching products:", err);
       setError(err.message);
@@ -57,32 +53,38 @@ function HomeScreen({ onCardAdded }) {
   const handleAddToCollection = async () => {
     if (!selectedProduct || !selectedCollection) return;
     try {
-      console.log("Selected Product:", selectedProduct); // Log the selected product
-      console.log("TCGPlayer Data:", selectedProduct.tcgplayer); // Log the TCGPlayer data
-      const tcgplayerPrices = selectedProduct.tcgplayer?.prices?.holofoil || {};
-      console.log("TCGPlayer Prices:", tcgplayerPrices); // Log TCGPlayer prices
+      console.log("Selected Product (PriceCharting):", selectedProduct); // Log the selected product from PriceCharting
+  
+      // Extract TCGPlayer prices
+      const tcgplayerPrices = selectedProduct.tcgplayerPrices || {};
+      console.log("Mapped TCGPlayer Prices:", tcgplayerPrices); // Log the mapped TCGPlayer prices
+  
+      const cardData = {
+        name: selectedProduct.name || selectedProduct["product-name"],
+        set: selectedProduct.set?.name || selectedProduct["console-name"],
+        condition: 'N/A', // You can modify this to include actual condition if available
+        loosePrice: selectedProduct["loose-price"] || 0,
+        psa9Price: selectedProduct["graded-price"] || 0,
+        psa10Price: selectedProduct["manual-only-price"] || 0,
+        tcgplayerPrices: {
+          low: tcgplayerPrices.low || 0,
+          mid: tcgplayerPrices.mid || 0,
+          high: tcgplayerPrices.high || 0,
+          market: tcgplayerPrices.market || 0,
+          directLow: tcgplayerPrices.directLow || 0,
+        },
+        cardId: selectedProduct.id || selectedProduct["id"], // Include cardId
+        collectionId: selectedCollection, // Include collectionId
+      };
+  
+      console.log("Card Data being added to collection:", cardData); // Log the card data being added
+  
       const response = await fetch('/api/cards', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          name: selectedProduct.name || selectedProduct["product-name"],
-          set: selectedProduct.set?.name || selectedProduct["console-name"],
-          condition: 'N/A', // You can modify this to include actual condition if available
-          loosePrice: selectedProduct["loose-price"] || 0,
-          psa9Price: selectedProduct["graded-price"] || 0,
-          psa10Price: selectedProduct["manual-only-price"] || 0,
-          tcgplayerPrices: {
-            low: tcgplayerPrices.low || 0,
-            mid: tcgplayerPrices.mid || 0,
-            high: tcgplayerPrices.high || 0,
-            market: tcgplayerPrices.market || 0,
-            directLow: tcgplayerPrices.directLow || 0,
-          },
-          cardId: selectedProduct.id || selectedProduct["id"], // Include cardId
-          collectionId: selectedCollection, // Include collectionId
-        }),
+        body: JSON.stringify(cardData),
       });
       const data = await response.json();
       if (response.ok) {
@@ -95,7 +97,6 @@ function HomeScreen({ onCardAdded }) {
       setError('Error adding card to collection');
     }
   };
-
   useEffect(() => {
     if (message) {
       const timer = setTimeout(() => {
@@ -160,7 +161,7 @@ function HomeScreen({ onCardAdded }) {
           <ul className="results-list">
             {results.map((product) => (
               <li
-                key={product.id}
+                key={product.id || product["id"]}
                 className="result-item"
                 onClick={() => handleSelectProduct(product)}
               >
